@@ -39,6 +39,9 @@ usage: pint -h | --help
           [ --filter=<filter> ]
           [ --json | --xml ]
           [ --region=<region> ]
+       pint ({PROVIDERS}) data_version
+          [ --category=<filter> ]
+          [ --json ]
        pint -v | --version
 
 options:
@@ -53,6 +56,8 @@ options:
        (scheduled for deletion in 6 months after their deprecated date)
    --filter=<filter>
        Comma separated list of available attributes
+   --category=<filter>
+       Category to with displaying the data version, either from 'servers' or 'images'
    --inactive
        Only include images which are inactive
        (only receiving critical updates, but not yet deprecated)
@@ -81,6 +86,7 @@ from docopt import docopt
 import susepubliccloudinfoclient.infoserverrequests as ifsrequest
 import susepubliccloudinfoclient.version as version
 
+
 try:
     provider_data = ifsrequest.get_provider_data(
         None, None, 'json', 'all', None
@@ -104,7 +110,6 @@ command_args = docopt(
     ),
     version=version.VERSION
 )
-
 framework = None
 for csp in cloud_providers:
     if command_args[csp]:
@@ -150,6 +155,9 @@ region = 'all'
 if command_args['--region']:
     region = command_args['--region']
 
+if command_args['--category'] == None:
+    command_args['--category'] = 'images'
+
 try:
     if command_args['images']:
         data = ifsrequest.get_image_data(
@@ -182,6 +190,13 @@ try:
             output_format,
             region,
             command_args['--filter']))
+    elif command_args['data_version']:
+        print(ifsrequest.get_data_version(
+            framework,
+            server_type,
+            output_format,
+            region,
+            command_args['--category']))
     elif command_args['server_types']:
         print(ifsrequest.get_server_types_data(
             framework,

@@ -151,6 +151,7 @@ def __form_url(
     url_components = []
     url_components.append(__get_base_url())
     url_components.append(__get_api_version())
+
     if framework:
         url_components.append(framework)
     if region == 'all':
@@ -161,12 +162,17 @@ def __form_url(
         url_components.append('images/states')
     elif info_type == 'types':
         url_components.append('servers/types')
+    elif info_type == 'data_version':
+        url_components.append('dataversion?category')
     else:
         url_components.append(info_type)
     doc_type = image_state or server_type
     if doc_type:
         url_components.append(doc_type)
-    url_components[-1] = url_components[-1] + '.json'
+    if info_type == 'data_version':
+        url_components[-1] = url_components[-1] + '=' + apply_filters
+    else:
+        url_components[-1] = url_components[-1] + '.json'
     url = '/'
     return url.join(url_components)
 
@@ -258,6 +264,9 @@ def __parse_command_arg_filter(command_arg_filter=None):
 
 
 def __parse_server_response_data(server_response_data, info_type):
+    if info_type == 'data_version':
+        return json.loads(server_response_data)
+
     return json.loads(server_response_data)[info_type]
 
 
@@ -298,7 +307,10 @@ def __process(url, info_type, command_arg_filter, result_format):
     """
     server_response_data = __get_data(url)
     resultset = __parse_server_response_data(server_response_data, info_type)
-    if command_arg_filter:
+
+    if info_type == 'data_version':
+        __reformat(resultset, info_type, result_format)
+    elif command_arg_filter:
         filters = __parse_command_arg_filter(command_arg_filter)
         resultset = __apply_filters(resultset, filters)
     return __reformat(resultset, info_type, result_format)
@@ -407,6 +419,25 @@ def get_server_data(
         command_arg_filter=None):
     """Return the requested server information"""
     info_type = 'servers'
+    url = __form_url(
+        framework,
+        info_type,
+        result_format,
+        region,
+        server_type=server_type,
+        apply_filters=command_arg_filter
+    )
+    return __process(url, info_type, command_arg_filter, result_format)
+
+
+def get_data_version(
+        framework,
+        server_type,
+        result_format='plain',
+        region='all',
+        command_arg_filter='images'):
+    """Return the requested server information (default is images)"""
+    info_type = 'data_version'
     url = __form_url(
         framework,
         info_type,
