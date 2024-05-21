@@ -137,7 +137,9 @@ for item in server_types:
         server_type = item
         break
 
-output_format = 'plain'
+# change the default output format, to JSON
+# output_format = 'plain'
+output_format = 'json'
 output_options = ('json', 'xml')
 for out in output_options:
     if command_args['--%s' % out]:
