@@ -41,7 +41,7 @@ usage: pint -h | --help
           [ --region=<region> ]
        pint ({PROVIDERS}) data_version
           [ --category=<filter> ]
-          [ --json ]
+          [ --json | --xml ]
        pint -v | --version
 
 options:

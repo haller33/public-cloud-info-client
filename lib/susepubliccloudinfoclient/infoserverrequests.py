@@ -217,7 +217,7 @@ def __inflect(plural):
     inflections = {
         'images': 'image', 'servers': 'server',
         'providers': 'provider', 'states': 'state', 'types': 'type',
-        'regions': 'region'
+        'regions': 'region', 'data_version': 'data_version'
     }
     return inflections[plural]
 
@@ -274,6 +274,8 @@ def __reformat(items, info_type, result_format):
     # default to JSON output (for SUSE Application)
     # elif result_format == 'xml':
     if result_format == 'xml':
+        if info_type == 'data_version':
+            items = [items]
         root = etree.Element(info_type)
         for item in items:
             etree.SubElement(root, __inflect(info_type), item)
